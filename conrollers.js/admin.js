@@ -122,13 +122,9 @@ exports.createSeller = async (req, res) => {
 
 
 // Add category
-
-
-
 exports.addCategory = async (req, res) => {
   try {
     const { name } = req.body;
-
 
     const exists = await Category.findOne({ name });
     if (exists) {

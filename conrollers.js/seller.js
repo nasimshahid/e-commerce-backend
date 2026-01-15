@@ -1,8 +1,5 @@
 const Product = require("../models/product");
 
-
-
-
 exports.addProduct = async (req, res) => {
   try {
     const { name, price, description, category } = req.body;
@@ -14,7 +11,6 @@ exports.addProduct = async (req, res) => {
       category,
       seller: req.user._id
     });
-
     await product.save();
 
     res.status(201).json({

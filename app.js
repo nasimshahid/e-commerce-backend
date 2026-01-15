@@ -6,6 +6,7 @@ const adminRoutes = require('./routes/admin');
 const userRouter = require('./routes/user');
 const sellerRoutes = require('./routes/seller');
 const port = 4000;
+const cartRoutes = require('./routes/cart');
 
 // db Connected
 
@@ -51,6 +52,7 @@ app.use(express.json());
 app.use('/', adminRoutes);
 app.use('/', userRouter);
 app.use('/', sellerRoutes);
+app.use('/', cartRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
