@@ -7,7 +7,7 @@ const userRouter = require('./routes/user');
 const sellerRoutes = require('./routes/seller');
 const port = 4000;
 const cartRoutes = require('./routes/cart');
-
+const cors = require('cors');
 // db Connected
 
 
@@ -48,7 +48,7 @@ const createUserTypes = async (req, res) => {
 createUserTypes()
 
 app.use(express.json());
-
+app.use(cors());
 app.use('/', adminRoutes);
 app.use('/', userRouter);
 app.use('/', sellerRoutes);

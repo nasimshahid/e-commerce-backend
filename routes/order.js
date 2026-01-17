@@ -1,14 +1,18 @@
-const { placeOrder, myOrders, orderDetail, cancelOrder, allOrders, updateStatus } = require('../conrollers.js/order');
+const express = require("express");
+const router = express.Router();
+const { placeOrder, getMyOrders, getOrderById, cancelOrder, getSellerOrders, getAllOrders, updateOrderStatus } = require('../conrollers.js/order');
 
-const router = require('express').Router();
+// USER
+router.post("/place", placeOrder);
+router.get("/my-orders", getMyOrders);
+router.get("/:id", getOrderById);
+router.put("/cancel/:id", cancelOrder);
 
-router.post('/place',  placeOrder);
-router.get('/my-orders',  myOrders);
-router.get('/:id',  orderDetail);
-router.put('/cancel/:id',  cancelOrder);
+// SELLER
+router.get("/seller/orders", getSellerOrders);
 
-// Admin
-router.get('/admin/all',  allOrders);
-router.put('/admin/status/:id',  updateStatus);
+// ADMIN
+router.get("/admin/all", getAllOrders);
+router.put("/admin/status/:id", updateOrderStatus);
 
 module.exports = router;
