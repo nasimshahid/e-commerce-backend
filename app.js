@@ -7,6 +7,7 @@ const userRouter = require('./routes/user');
 const sellerRoutes = require('./routes/seller');
 const port = 4000;
 const cartRoutes = require('./routes/cart');
+const orderRoutes = require('./routes/order');
 const cors = require('cors');
 // db Connected
 
@@ -53,6 +54,7 @@ app.use('/', adminRoutes);
 app.use('/', userRouter);
 app.use('/', sellerRoutes);
 app.use('/', cartRoutes);
+app.use('/', orderRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
