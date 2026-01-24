@@ -8,6 +8,7 @@ const sellerRoutes = require('./routes/seller');
 const port = 4000;
 const cartRoutes = require('./routes/cart');
 const orderRoutes = require('./routes/order');
+const deliveryRoutes = require('./routes/delivery');
 const cors = require('cors');
 // db Connected
 
@@ -34,7 +35,8 @@ const createUserTypes = async (req, res) => {
     await UserType.insertMany([
       { role: 'admin' },
       { role: 'seller' },
-      { role: 'user' }
+      { role: 'user' },
+      { role: 'delivery' },
     ]);
 
     // res.json({ message: 'User types saved successfully' });
@@ -55,6 +57,7 @@ app.use('/', userRouter);
 app.use('/', sellerRoutes);
 app.use('/', cartRoutes);
 app.use('/', orderRoutes);
+app.use('/api',deliveryRoutes );
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

@@ -6,7 +6,7 @@ exports.addToCart = async (req, res) => {
     const { productId, quantity } = req.body;
 
     // const userId = req.user.id;
-    const userId = "69689fcec6cdba6db2107070"  // temp hardcoded;
+    const userId = "69748e0d33eabb5fb2eecda9"  // temp hardcoded;
 
     let cart = await Cart.findOne({ user: userId });
     console.log(cart, "first");

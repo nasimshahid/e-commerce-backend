@@ -26,6 +26,11 @@ const user = new mongoose.Schema({
         ref: 'UserType',
         default:null,
     },
+    deliveryInfo: {
+  vehicleNumber: String,
+  isAvailable: { type: Boolean, default: true }
+}
+    ,
     isActive: {
         type: Boolean,
         default: true

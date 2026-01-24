@@ -12,7 +12,7 @@ const generateOrderNumber = () => {
 exports.placeOrder = async (req, res) => {
   try {
     // const userId = req.user._id;
-    const userId = "69689fcec6cdba6db2107070";
+    const userId = "69748e0d33eabb5fb2eecda9";
     const { paymentMethod, shippingAddress } = req.body;
 
     // 1️⃣ Get cart

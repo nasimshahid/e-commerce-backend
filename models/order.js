@@ -68,7 +68,20 @@ const orderSchema = new mongoose.Schema(
       type: String,
       enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
       default: "pending"
-    }
+    },deliveryBoy: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "User"
+},
+
+deliveryStatus: {
+  type: String,
+  enum: ["pending", "assigned", "out_for_delivery", "delivered", "failed"],
+  default: "pending"
+},
+
+deliveryOTP: String,
+deliveredAt: Date
+
   },
   { timestamps: true }
 );
