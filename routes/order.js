@@ -5,7 +5,7 @@ const { authUser, authSeller, authAdmin } = require('../middleware/auth');
 const { validate } = require('../middleware/validation');
 
 // USER — static routes MUST come before the dynamic /:id route
-router.post("/place", authUser, validate('placeOrder'), placeOrder);
+router.post("/place", authUser,placeOrder);
 router.get("/my-orders", authUser, getMyOrders);
 router.put("/cancel/:id", authUser, cancelOrder);
 

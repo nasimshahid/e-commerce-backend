@@ -6,12 +6,11 @@ const { login, signup, verifyEmail, forgotPassword, resetPassword } = require('.
 const { validate } = require('../middleware/validation');
 
 // User Authentication Routes
-router.post("/signup", validate('signup'), signup);
-router.post("/login", validate('login'), login);
-router.post("/verify-email", validate('verifyEmail'), verifyEmail);
-
+router.post("/signup", signup);
+router.post("/login", login);
+router.post("/verify-email",  verifyEmail);
 // Password Reset Routes
-router.post("/forgot-password", validate('forgotPassword'), forgotPassword);
-router.post("/reset-password", validate('resetPassword'), resetPassword);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password",  resetPassword);
 
 module.exports = router;

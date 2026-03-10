@@ -7,6 +7,6 @@ const { validate } = require("../middleware/validation");
 
 router.get("/my-delivery", authDeliveryBot, getMyDeliveryOrders);
 router.put("/out-for-delivery/:orderId", authDeliveryBot, outForDelivery);
-router.put("/verify-delivery/:orderId", authDeliveryBot, validate('verifyDeliveryOTP'), verifyDeliveryOTP);
+router.put("/verify-delivery/:orderId", authDeliveryBot, verifyDeliveryOTP);
 
 module.exports = router;

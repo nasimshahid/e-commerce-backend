@@ -5,6 +5,6 @@ const { validate } = require('../middleware/validation');
 
 const router = express.Router();
 
-router.post('/add-product', authSeller, validate('addProduct'), addProduct);
+router.post('/add-product', authSeller, addProduct);
 
 module.exports = router;
