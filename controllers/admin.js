@@ -2,35 +2,71 @@ const UserType = require("../models/userType");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const Category = require("../models/category");
-
 const { sendEmail } = require("../utils/sendMail");
 const Order = require("../models/order");
+
+// Generate a random secure temporary password
+const generateTempPassword = () => {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#$!';
+  let password = '';
+  for (let i = 0; i < 12; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+};
+
 exports.createAdminUser = async (req, res) => {
     try {
-        // Find admin user type
+        // Protect this one-time endpoint with a secret setup key
+        const { setupKey } = req.body;
+        if (!setupKey || setupKey !== process.env.ADMIN_SETUP_KEY) {
+            return res.status(403).json({ message: 'Invalid or missing setup key' });
+        }
+
         const adminType = await UserType.findOne({ role: 'admin' });
         if (!adminType) {
             return res.status(400).json({ message: 'Admin user type not found' });
         }
         const isAdminExists = await User.findOne({ email: 'admin@gmail.com' });
         if (isAdminExists) {
-            return res.status(400).json({ message: 'Admin  already exists' });
+            return res.status(400).json({ message: 'Admin already exists' });
         }
 
-        const hashedPassword = await bcrypt.hash('admin123', 10);
-        // Create new admin user
+        // Generate secure password
+        const defaultPassword = generateTempPassword();
+        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
         const newAdmin = new User({
             name: "Admin",
             email: "admin@gmail.com",
             password: hashedPassword,
-            address: "webel",
-            mobile: "1234567890",
+            address: "Admin Address",
+            mobile: "0000000000",
             userType: adminType._id,
             isVerified: true,
             isActive: true
         });
         await newAdmin.save();
-        res.status(201).json({ message: 'Admin user created successfully', user: newAdmin });
+
+        // Send credentials via email
+        await sendEmail(
+            "admin@gmail.com",
+            "Admin Account Created - Login Credentials",
+            `
+            <div style="font-family: Arial, sans-serif;">
+              <h2>Admin Account Created</h2>
+              <p>Your admin account has been created successfully.</p>
+              <p><strong>Email:</strong> admin@gmail.com</p>
+              <p><strong>Temporary Password:</strong> ${defaultPassword}</p>
+              <p><strong>Please change your password immediately after login.</strong></p>
+            </div>
+            `
+        );
+
+        res.status(201).json({ 
+            message: 'Admin user created successfully. Credentials sent to email.',
+            user: { name: newAdmin.name, email: newAdmin.email } 
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -42,7 +78,7 @@ exports.createAdminUser = async (req, res) => {
 // Create Seller
 exports.createSeller = async (req, res) => {
   try {
-    const { name, email, password, mobile, address } = req.body;
+    const { name, email, mobile, address } = req.body;
 
     // 1️⃣ check existing seller
     const existingUser = await User.findOne({ email });
@@ -56,8 +92,9 @@ exports.createSeller = async (req, res) => {
       return res.status(500).json({ message: "Seller role not found" });
     }
 
-    // 3️⃣ hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // 3️⃣ generate + hash a secure temporary password (never use admin-supplied plain text)
+    const tempPassword = generateTempPassword();
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
     // 4️⃣ create seller
     const seller = new User({
@@ -73,42 +110,28 @@ exports.createSeller = async (req, res) => {
 
     await seller.save();
 
-    // 5️⃣ send credentials email
+    // 5️⃣ send credentials email with temporary password
     await sendEmail(
       email,
       "Seller Account Created – Login Credentials",
       `
       <div style="font-family: Arial, Helvetica, sans-serif; line-height: 1.7; color: #333;">
         <h2>Welcome to Our Platform</h2>
-
         <p>Dear ${name},</p>
-
         <p>
           Your seller account has been successfully created by the administrator.
           You can now log in using the credentials below:
         </p>
-
-        <p>
+        <p style="background:#f5f5f5; padding:10px; border-radius:6px;">
           <strong>Email:</strong> ${email}<br/>
-          <strong>Password:</strong> ${password}
+          <strong>Temporary Password:</strong> ${tempPassword}
         </p>
-
-        <p>
-          For security reasons, we strongly recommend changing your password
-          after your first login.
+        <p style="color: #c0392b;">
+          <strong>⚠️ Please change your password immediately after your first login.</strong>
         </p>
-
-        <p>
-          If you have any questions, feel free to contact our support team.
-        </p>
-
+        <p>If you have any questions, feel free to contact our support team.</p>
         <br/>
-
-        <p>
-          Best regards,<br/>
-          <strong>Your Company Name</strong><br/>
-          Support Team
-        </p>
+        <p>Best regards,<br/><strong>Your Company Name</strong><br/>Support Team</p>
       </div>
       `
     );
@@ -155,14 +178,16 @@ exports.addCategory = async (req, res) => {
 
 exports.createDeliveryBoy = async (req, res) => {
   try {
-    const { name, email, password, mobile, vehicleNumber } = req.body;
+    const { name, email, mobile, vehicleNumber } = req.body;
 
     const exists = await User.findOne({ email });
     if (exists) {
       return res.status(400).json({ message: "Delivery boy already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Generate a secure temporary password
+    const tempPassword = generateTempPassword();
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
     const deliveryRole = await UserType.findOne({ role: "delivery" });
 
@@ -175,65 +200,39 @@ exports.createDeliveryBoy = async (req, res) => {
       deliveryInfo: { vehicleNumber },
       isActive: true,
       isVerified: true
-
     });
 
     await deliveryBoy.save();
-     await sendEmail(
-  email,
-  "Delivery Partner Account Created – Login Credentials",
-  `
+
+    await sendEmail(
+      email,
+      "Delivery Partner Account Created – Login Credentials",
+      `
   <div style="font-family: Arial, Helvetica, sans-serif; line-height: 1.7; color: #333;">
     <h2>Welcome to Our Delivery Team 🚚</h2>
-
     <p>Dear ${name},</p>
-
-    <p>
-      Your <strong>Delivery Partner account</strong> has been successfully created
-      by the administrator.
-    </p>
-
-    <p>
-      You can log in to the delivery app/portal using the credentials below:
-    </p>
-
+    <p>Your <strong>Delivery Partner account</strong> has been successfully created by the administrator.</p>
+    <p>You can log in to the delivery app/portal using the credentials below:</p>
     <p style="background:#f5f5f5; padding:10px; border-radius:6px;">
       <strong>Email:</strong> ${email}<br/>
-      <strong>Password:</strong> ${password}
+      <strong>Temporary Password:</strong> ${tempPassword}
     </p>
-
-    <p>
-      Please keep your login credentials confidential.
-      For security reasons, we strongly recommend changing your password
-      after your first login.
+    <p style="color: #c0392b;">
+      <strong>⚠️ Please change your password immediately after your first login.</strong>
     </p>
-
-    <p>
-      Once logged in, you will be able to:
+    <p>Once logged in, you will be able to:
       <ul>
         <li>View assigned deliveries</li>
         <li>Update delivery status</li>
         <li>Verify delivery using OTP</li>
       </ul>
     </p>
-
-    <p>
-      If you face any issues or have questions, please contact our support team.
-    </p>
-
+    <p>If you face any issues, please contact our support team.</p>
     <br/>
-
-    <p>
-      Best regards,<br/>
-      <strong>Your Company Name</strong><br/>
-      Delivery Operations Team
-    </p>
+    <p>Best regards,<br/><strong>Your Company Name</strong><br/>Delivery Operations Team</p>
   </div>
   `
-);
-
-
-
+    );
 
     res.status(201).json({
       message: "Delivery boy created successfully",

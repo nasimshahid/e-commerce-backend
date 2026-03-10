@@ -1,11 +1,10 @@
 const express = require('express');
-const { addProduct } = require('../conrollers.js/seller');
+const { addProduct } = require('../controllers/seller');
 const { authSeller } = require('../middleware/auth');
+const { validate } = require('../middleware/validation');
 
 const router = express.Router();
 
+router.post('/add-product', authSeller, validate('addProduct'), addProduct);
 
-
-// router.post('/add-category', addCategory);
-router.post('/add-product', authSeller,addProduct);
 module.exports = router;

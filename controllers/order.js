@@ -11,8 +11,7 @@ const generateOrderNumber = () => {
 // ============================
 exports.placeOrder = async (req, res) => {
   try {
-    // const userId = req.user._id;
-    const userId = "69748e0d33eabb5fb2eecda9";
+    const userId = req.user._id;
     const { paymentMethod, shippingAddress } = req.body;
 
     // 1️⃣ Get cart
@@ -30,7 +29,6 @@ exports.placeOrder = async (req, res) => {
       const product = item.product;
 
       totalAmount += product.price * item.quantity;
-      console.log(totalAmount, "totalAmount")
       orderItems.push({
         product: product._id,
         seller: product.seller,
@@ -72,10 +70,8 @@ exports.placeOrder = async (req, res) => {
 // GET MY ORDERS (USER)
 // ============================
 exports.getMyOrders = async (req, res) => {
-      const userId = "69689fcec6cdba6db2107070";
   try {
-    // const orders = await Order.find({ user: req.user._id })
-    const orders = await Order.find({ user: userId })
+    const orders = await Order.find({ user: req.user._id })
       .populate("items.product")
       .populate("items.seller")
       .sort({ createdAt: -1 });
@@ -99,6 +95,11 @@ exports.getOrderById = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    // Ensure the requesting user owns this order
+    if (order.user._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
     res.json(order);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -114,6 +115,11 @@ exports.cancelOrder = async (req, res) => {
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Ensure the requesting user owns this order
+    if (order.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Access denied" });
     }
 
     if (order.status !== "pending") {

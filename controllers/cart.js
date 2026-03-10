@@ -5,19 +5,15 @@ exports.addToCart = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
 
-    // const userId = req.user.id;
-    const userId = "69748e0d33eabb5fb2eecda9"  // temp hardcoded;
+    const userId = req.user._id;
 
     let cart = await Cart.findOne({ user: userId });
-    console.log(cart, "first");
     if (!cart) {
       cart = new Cart({ user: userId, items: [] });
     }
-    console.log(cart, "2nd");
     const itemIndex = cart.items.findIndex(
       item => item.product.toString() === productId
     );
-    console.log(itemIndex, "itemIndex");
     if (itemIndex > -1) {
       cart.items[itemIndex].quantity += quantity;
     } else {
@@ -35,8 +31,7 @@ exports.addToCart = async (req, res) => {
 // Get my cart
 exports.getCart = async (req, res) => {
   try {
-    // const cart = await Cart.findOne({ user: req.user.id })
-    const cart = await Cart.findOne({ user: "69689fcec6cdba6db2107070" })
+    const cart = await Cart.findOne({ user: req.user._id })
       .populate("items.product");
 
     res.json(cart);
@@ -50,7 +45,7 @@ exports.updateCart = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
 
-    const cart = await Cart.findOne({ user: req.user.id });
+    const cart = await Cart.findOne({ user: req.user._id });
 
     const item = cart.items.find(i => i.product.toString() === productId);
     if (!item) return res.status(404).json({ message: "Item not found" });
@@ -70,7 +65,7 @@ exports.removeItem = async (req, res) => {
   try {
     const { productId } = req.params;
 
-    const cart = await Cart.findOne({ user: req.user.id });
+    const cart = await Cart.findOne({ user: req.user._id });
 
     cart.items = cart.items.filter(i => i.product.toString() !== productId);
     await cart.save();
@@ -83,7 +78,7 @@ exports.removeItem = async (req, res) => {
 
 // Clear cart
 exports.clearCart = async (req, res) => {
-  await Cart.findOneAndUpdate({ user: req.user.id }, { items: [] });
+  await Cart.findOneAndUpdate({ user: req.user._id }, { items: [] });
   res.json({ message: "Cart cleared" });
 };
 

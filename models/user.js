@@ -1,36 +1,39 @@
 const mongoose = require('mongoose');
 
-
 const user = new mongoose.Schema({
     name: {
         type: String,
-        default:null,
+        trim: true,
+        default: null,
     },
     email: {
         type: String,
-        default:null,
-        unique: true
+        unique: true,
+        sparse: true,       // allows null without unique-conflict
+        lowercase: true,
+        trim: true
     },
     password: {
         type: String,
-        default:null,
+        default: null,
     },
     address: {
-        type: String
+        type: String,
+        trim: true
     },
     mobile: {
-        type: String
+        type: String,
+        trim: true
     },
     userType: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'UserType',
-        default:null,
+        default: null,
     },
     deliveryInfo: {
-  vehicleNumber: String,
-  isAvailable: { type: Boolean, default: true }
-}
-    ,
+        vehicleNumber: { type: String, trim: true },
+        isAvailable: { type: Boolean, default: true }
+    },
     isActive: {
         type: Boolean,
         default: true
@@ -39,20 +42,19 @@ const user = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    otp:{
-        type:String,
-        default:null,
+    otp: {
+        type: String,
+        default: null,
     },
-    otpExpires:{
-        type:Date,
-      default:null,
+    otpExpires: {
+        type: Date,
+        default: null,
     },
     isDeleted: {
-        type: Date,
-        default: null
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
-
 
 const User = mongoose.model('User', user);
 module.exports = User;

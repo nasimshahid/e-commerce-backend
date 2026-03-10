@@ -3,9 +3,8 @@ const { sendEmail } = require("../utils/sendMail");
 
 exports.getMyDeliveryOrders = async (req, res) => {
   try {
-    console.log("Delivery Boy ID:", "6974903cc9a6d7081c0d38bf");
     const orders = await Order.find({
-      deliveryBoy: "6974903cc9a6d7081c0d38bf",
+      deliveryBoy: req.user._id,
     //   deliveryBoy: req.user._id,
       deliveryStatus: { $ne: "delivered" }
     })
@@ -24,64 +23,11 @@ exports.getMyDeliveryOrders = async (req, res) => {
 };
 
 
-// exports.updateDeliveryStatus = async (req, res) => {
-//   try {
-//     const { status } = req.body;
-
-//     const order = await Order.findOneAndUpdate(
-//       { _id: req.params.orderId, deliveryBoy: req.user._id },
-//       { deliveryStatus: status },
-//       { new: true }
-//     );
-
-//     res.json({ message: "Delivery status updated", order });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-// exports.verifyDeliveryOTP = async (req, res) => {
-//   try {
-//     const { otp } = req.body;
-
-//     const order = await Order.findOne({
-//       _id: req.params.orderId,
-//       deliveryBoy: req.user._id
-//     });
-
-//     if (!order) {
-//       return res.status(404).json({ message: "Order not found" });
-//     }
-
-//     if (order.deliveryOTP !== otp) {
-//       return res.status(400).json({ message: "Invalid OTP" });
-//     }
-
-//     order.deliveryStatus = "delivered";
-//     order.status = "delivered";
-//     order.deliveredAt = new Date();
-//     order.deliveryOTP = null;
-
-//     // COD case
-//     if (order.paymentMethod === "COD") {
-//       order.paymentStatus = "paid";
-//     }
-
-//     await order.save();
-
-//     res.json({ message: "Order delivered successfully", order });
-
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-
 exports.outForDelivery = async (req, res) => {
   try {
     const order = await Order.findOne({
       _id: req.params.orderId,
-      deliveryBoy:"6974903cc9a6d7081c0d38bf"
+      deliveryBoy: req.user._id
     }).populate("user");
 
     if (!order) {
@@ -126,8 +72,7 @@ exports.verifyDeliveryOTP = async (req, res) => {
 
     const order = await Order.findOne({
       _id: req.params.orderId,
-    //   deliveryBoy: "req.user._id"
-      deliveryBoy: "6974903cc9a6d7081c0d38bf"
+      deliveryBoy: req.user._id
     });
 
     if (!order) {

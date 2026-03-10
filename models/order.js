@@ -80,6 +80,7 @@ deliveryStatus: {
 },
 
 deliveryOTP: String,
+deliveryOTPExpires: Date,
 deliveredAt: Date
 
   },
