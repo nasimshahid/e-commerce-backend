@@ -137,7 +137,7 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ email: email }).populate('userType');
 
     if (!user) {
       return res.status(400).json({ message: "User not found" });
@@ -297,6 +297,27 @@ exports.resetPassword = async (req, res) => {
     res.status(200).json({
       message: "Password reset successfully. Please login with your new password."
     });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+exports.getAllUsers = async (req, res) => {
+  try {
+
+    const users = await User.find({})
+      .populate({
+        path: "userType",
+        match: { role: "user" },
+        select: "role"
+      })
+      .lean();
+
+    const filteredUsers = users.filter(
+      user => user.userType
+    );
+
+    res.status(200).json(filteredUsers);
 
   } catch (error) {
     res.status(500).json({ error: error.message });
